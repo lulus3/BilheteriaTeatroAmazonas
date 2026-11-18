@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#17110f" />
+    <title>Bilheteria Teatro Amazonas | Protótipo Sepolia</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/web3@4.16.0/dist/web3.min.js"></script>
+    <script defer src="contrato.js"></script>
+    <script defer src="mapa-assentos.js"></script>
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#inicio" aria-label="Bilheteria, início">
+        <span class="brand-mark" aria-hidden="true">TA</span>
+        <span><strong>Bilheteria</strong><small>Teatro Amazonas · protótipo</small></span>
+      </a>
+      <div class="wallet-area">
+        <span id="network-status" class="network-pill">Sepolia</span>
+        <button id="connect-wallet" class="button button-outline" type="button">Conectar carteira</button>
+      </div>
+    </header>
+
+    <main id="inicio">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">CULTURA · MANAUS · WEB3</p>
+          <h1>Uma noite no<br /><em>Amazonas.</em></h1>
+          <p class="hero-text">Explore eventos, escolha seu lugar e acompanhe seu ingresso na Sepolia.</p>
+          <a class="button button-gold" href="#eventos">Ver eventos <span aria-hidden="true">↓</span></a>
+        </div>
+        <div class="hero-art" aria-label="Ilustração abstrata inspirada na arquitetura de um teatro">
+          <div class="arch arch-outer"></div><div class="arch arch-inner"></div>
+          <div class="stage-light"></div><span class="hero-caption">MANAUS, AMAZONAS</span>
+        </div>
+      </section>
+
+      <section id="eventos" class="events-section">
+        <div class="section-heading">
+          <div><p class="eyebrow">PROGRAMAÇÃO</p><h2>Próximos eventos</h2></div>
+          <p class="chain-note"><span class="status-dot"></span> Rede de teste Sepolia</p>
+        </div>
+        <div id="notice" class="notice" role="status" aria-live="polite">Conecte sua carteira para carregar os eventos da Sepolia.</div>
+        <div id="events-list" class="events-grid" aria-live="polite"></div>
+      </section>
+
+      <section id="admin-panel" class="admin-section hidden">
+        <div class="section-heading">
+          <div><p class="eyebrow">ADMINISTRAÇÃO</p><h2>Gerenciar programação</h2></div>
+          <span class="admin-badge">Carteira administradora</span>
+        </div>
+        <form id="create-event-form" class="admin-form">
+          <label>Nome do evento<input name="nome" required maxlength="100" placeholder="Ex.: Concerto de abertura" /></label>
+          <label>Data e horário<input name="dataHora" required placeholder="Ex.: 20/12/2026 às 19h" /></label>
+          <label>Local<input name="local" required value="Teatro Amazonas" /></label>
+          <label>Preço base (ETH)<input name="preco" required inputmode="decimal" placeholder="0.001" /></label>
+          <label>Ajuste no preço (ETH)<input name="ajuste" inputmode="decimal" value="0" /><small>Opcional: desconto negativo ou adicional positivo.</small></label>
+          <div class="fixed-map-note wide-field"><strong>Mapa fixo da casa</strong><span>120 assentos numerados em plateia, frisas e camarotes. O mapa é o mesmo para todos os eventos.</span></div>
+          <label>Carteira organizadora<input name="organizador" required autocomplete="off" /></label>
+          <label class="wide-field">Hash do programa (bytes32)<input name="referenciaPrograma" value="0x0000000000000000000000000000000000000000000000000000000000000000" pattern="0x[a-fA-F0-9]{64}" required /><small>Use o valor zerado acima se não houver hash.</small></label>
+          <button class="button button-gold wide-field" type="submit">Cadastrar evento na Sepolia</button>
+        </form>
+      </section>
+
+      <section id="meus-ingressos" class="tickets-section">
+        <div><p class="eyebrow">SUA CONTA</p><h2>Meus ingressos</h2></div>
+        <div id="wallet-details" class="wallet-details">Carteira não conectada</div>
+        <div id="organizer-revenue" class="organizer-revenue hidden"></div>
+        <div id="my-tickets" class="ticket-list"></div>
+      </section>
+    </main>
+
+    <footer><span>Protótipo acadêmico para Ethereum Sepolia.</span><span>Sem vínculo oficial com o Teatro Amazonas.</span></footer>
+  </body>
+</html>
