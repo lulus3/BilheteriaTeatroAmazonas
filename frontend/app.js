@@ -255,15 +255,24 @@
     const picker = node('div', 'seat-picker hidden');
     const seatMap = node('div', 'seat-map-container');
     picker.append(seatMap);
-    const selection = node('p', 'selection-summary', 'Selecione um assento.');
+    const selection = node('p', 'selection-summary', 'Selecione um ou mais assentos.');
     picker.append(selection);
-    const buyButton = node('button', 'button button-gold buy-button', 'Comprar ingresso');
+    const buyButton = node('button', 'button button-gold buy-button', 'Comprar ingressos');
     buyButton.type = 'button';
     buyButton.disabled = true;
     picker.append(buyButton);
     card.append(picker);
 
-    let selectedSeat = null;
+    const selectedSeats = new Map();
+    const updateSelection = () => {
+      const chosen = [...selectedSeats.values()];
+      const total = BigInt(event.priceWei) * BigInt(chosen.length);
+      selection.textContent = chosen.length
+        ? `${chosen.length} assento(s): ${chosen.map((seat) => seat.code).join(', ')} · total ${formatEth(total.toString())} SepoliaETH. A MetaMask pedirá uma confirmação para cada ingresso.`
+        : 'Selecione um ou mais assentos.';
+      buyButton.textContent = chosen.length ? `Comprar ${chosen.length} ingresso(s)` : 'Comprar ingressos';
+      buyButton.disabled = chosen.length === 0;
+    };
     seatsToggle.addEventListener('click', async () => {
       const willOpen = picker.classList.contains('hidden');
       picker.classList.toggle('hidden', !willOpen);
@@ -273,11 +282,14 @@
         seatsToggle.textContent = 'Carregando lugares…';
         try {
           await renderSeatMap(seatMap, event, (seat, button) => {
-            seatMap.querySelectorAll('.seat.selected').forEach((selected) => selected.classList.remove('selected'));
-            button.classList.add('selected');
-            selectedSeat = seat;
-            selection.textContent = `${seat.code} · ${formatEth(event.priceWei)} SepoliaETH`;
-            buyButton.disabled = false;
+            if (selectedSeats.has(seat.id)) {
+              selectedSeats.delete(seat.id);
+              button.classList.remove('selected');
+            } else {
+              selectedSeats.set(seat.id, seat);
+              button.classList.add('selected');
+            }
+            updateSelection();
           });
           seatMap.dataset.loaded = 'true';
         } catch (error) {
@@ -290,18 +302,30 @@
     });
 
     buyButton.addEventListener('click', async () => {
-      if (!selectedSeat) return;
+      const seatsToBuy = [...selectedSeats.values()];
+      if (!seatsToBuy.length) return;
       buyButton.disabled = true;
-      buyButton.textContent = 'Aguardando MetaMask…';
+      let bought = 0;
       try {
-        const transaction = contract.methods.comprarIngresso(event.id, selectedSeat.id)
-          .send({ from: account, value: event.priceWei });
-        await sendTransaction(transaction, 'Compra enviada');
+        for (const seat of seatsToBuy) {
+          buyButton.textContent = `Confirmando ${bought + 1} de ${seatsToBuy.length}…`;
+          const transaction = contract.methods.comprarIngresso(event.id, seat.id)
+            .send({ from: account, value: event.priceWei });
+          await sendTransaction(transaction, `Compra do assento ${seat.code} enviada`, { refresh: false });
+          bought += 1;
+        }
+        await refreshApplication();
+        showNotice(`${bought} ingresso(s) comprado(s) com sucesso.`, 'success');
       } catch (error) {
-        showNotice(friendlyError(error), 'error');
+        await refreshApplication();
+        if (bought) {
+          showNotice(`${bought} de ${seatsToBuy.length} ingresso(s) foram comprados. A próxima confirmação falhou: ${friendlyError(error)}`, 'error');
+        } else {
+          showNotice(friendlyError(error), 'error');
+        }
       } finally {
-        buyButton.disabled = false;
-        buyButton.textContent = 'Comprar ingresso';
+        selectedSeats.clear();
+        updateSelection();
       }
     });
     return card;
@@ -489,7 +513,7 @@
     }
   });
 
-  async function sendTransaction(transaction, label) {
+  async function sendTransaction(transaction, label, { refresh = true } = {}) {
     let txHash;
     transaction.on('transactionHash', (hash) => {
       txHash = hash;
@@ -497,7 +521,7 @@
     });
     transaction.on('receipt', async (receipt) => {
       txHash = receipt.transactionHash || txHash;
-      await refreshApplication();
+      if (refresh) await refreshApplication();
       showNotice('Transação confirmada na Sepolia.', 'success', txHash);
     });
     return transaction;
