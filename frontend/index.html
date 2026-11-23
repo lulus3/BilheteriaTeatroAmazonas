@@ -3,8 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#17110f" />
-    <title>Bilheteria Teatro Amazonas | Protótipo Sepolia</title>
+    <meta name="theme-color" content="#211912" />
+    <title>Bilheteria Teatro Amazonas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="style.css" />
     <script src="https://cdn.jsdelivr.net/npm/web3@4.16.0/dist/web3.min.js"></script>
     <script defer src="contrato.js"></script>
@@ -13,65 +19,301 @@
   </head>
   <body>
     <header class="topbar">
-      <a class="brand" href="#inicio" aria-label="Bilheteria, início">
-        <span class="brand-mark" aria-hidden="true">TA</span>
-        <span><strong>Bilheteria</strong><small>Teatro Amazonas · protótipo</small></span>
+      <a class="brand" href="#inicio" id="brand-home" aria-label="Voltar para a página inicial" title="Página inicial">
+        <div class="brand-mark" aria-hidden="true">
+          <img src="assets/02_logo_icone_cupula_dourado.png" alt="" />
+        </div>
+        <span class="brand-copy"
+          ><strong>Bilheteria</strong><small>TEATRO AMAZONAS</small></span
+        >
       </a>
       <div class="wallet-area">
         <span id="network-status" class="network-pill">Sepolia</span>
-        <button id="connect-wallet" class="button button-outline" type="button">Conectar carteira</button>
+        <button id="connect-wallet" class="button button-outline" type="button">
+          Conectar carteira
+        </button>
       </div>
     </header>
 
     <main id="inicio">
-      <section class="hero">
+      <section class="hero" id="landing-hero">
+        <img
+          class="corner-ornament"
+          src="assets/10_canto_ornamento.png"
+          alt=""
+          aria-hidden="true"
+        />
+        <img
+          class="corner-ornament-right"
+          src="assets/10_canto_ornamento.png"
+          alt=""
+          aria-hidden="true"
+        />
         <div class="hero-copy">
-          <p class="eyebrow">CULTURA · MANAUS · WEB3</p>
-          <h1>Uma noite no<br /><em>Amazonas.</em></h1>
-          <p class="hero-text">Explore eventos, escolha seu lugar e acompanhe seu ingresso na Sepolia.</p>
-          <a class="button button-gold" href="#eventos">Ver eventos <span aria-hidden="true">↓</span></a>
+          <h1>Uma noite<br />inesquecível no <em>Teatro Amazonas.</em></h1>
+          <p class="hero-text">
+            Descubra a programação, escolha seus lugares e viva a experiência do
+            Teatro Amazonas.
+          </p>
+          <button
+            class="button button-gold hero-cta"
+            type="button"
+            data-open-tab="eventos"
+          >
+            Explorar programação <span aria-hidden="true">↗</span>
+          </button>
         </div>
-        <div class="hero-art" aria-label="Ilustração abstrata inspirada na arquitetura de um teatro">
-          <div class="arch arch-outer"></div><div class="arch arch-inner"></div>
-          <div class="stage-light"></div><span class="hero-caption">MANAUS, AMAZONAS</span>
+        <div class="hero-art">
+          <div class="theatre-frame">
+            <img
+              src="assets/02_logo_icone_cupula_dourado.png"
+              alt="Ilustração em traços do Teatro Amazonas"
+            />
+          </div>
+          <img
+            class="hero-sparkle"
+            src="assets/05_losango_ornamento.png"
+            alt=""
+            aria-hidden="true"
+          />
         </div>
       </section>
 
-      <section id="eventos" class="events-section">
-        <div class="section-heading">
-          <div><p class="eyebrow">PROGRAMAÇÃO</p><h2>Próximos eventos</h2></div>
-          <p class="chain-note"><span class="status-dot"></span> Rede de teste Sepolia</p>
+      <section class="workspace" aria-label="Área da bilheteria">
+        <div class="workspace-heading" id="workspace-home-heading">
+          <div>
+            <p class="eyebrow">SUA EXPERIÊNCIA COMEÇA AQUI</p>
+            <h2>Área do visitante</h2>
+          </div>
+          <p class="chain-note">
+            <span class="status-dot"></span> Rede de teste · Sepolia
+          </p>
         </div>
-        <div id="notice" class="notice" role="status" aria-live="polite">Conecte sua carteira para carregar os eventos da Sepolia.</div>
-        <div id="events-list" class="events-grid" aria-live="polite"></div>
-      </section>
+        <nav class="tab-nav shortcut-nav" id="shortcut-nav" aria-label="Atalhos da bilheteria">
+          <button
+            class="tab-button"
+            id="tab-eventos"
+            type="button"
+           
+           
+           
+            data-tab="eventos"
+          >
+            <span>01</span> Próximos eventos
+          </button>
+          <button
+            class="tab-button"
+            id="tab-ingressos"
+            type="button"
+           
+           
+           
+            data-tab="ingressos"
+          >
+            <span>02</span> Meus ingressos
+          </button>
+          <button
+            class="tab-button"
+            id="tab-conta"
+            type="button"
+           
+           
+           
+            data-tab="conta"
+          >
+            <span>03</span> Minha conta
+          </button>
+          <button
+            class="tab-button hidden"
+            id="tab-admin"
+            type="button"
+           
+           
+           
+            data-tab="admin"
+          >
+            <span>04</span> Administração
+          </button>
+        </nav>
 
-      <section id="admin-panel" class="admin-section hidden">
-        <div class="section-heading">
-          <div><p class="eyebrow">ADMINISTRAÇÃO</p><h2>Gerenciar programação</h2></div>
-          <span class="admin-badge">Carteira administradora</span>
+        <nav id="breadcrumbs" class="breadcrumbs" aria-label="Caminho de navegação" hidden>
+          <button id="breadcrumb-home" class="breadcrumb-back" type="button" title="Voltar para a página inicial">← Início</button>
+          <span class="breadcrumb-separator" aria-hidden="true">/</span>
+          <span class="breadcrumb-current" aria-current="page" id="breadcrumb-current">Próximos eventos</span>
+        </nav>
+
+        <div id="notice" class="notice" role="status" aria-live="polite">
+          Conecte sua carteira para carregar os eventos da Sepolia.
         </div>
-        <form id="create-event-form" class="admin-form">
-          <label>Nome do evento<input name="nome" required maxlength="100" /></label>
-          <label>Data e horário<input name="dataHora" required /></label>
-          <label>Local<input name="local" required value="Teatro Amazonas" /></label>
-          <label>Preço base (ETH)<input name="preco" required inputmode="decimal" /></label>
-          <label>Ajuste no preço (ETH)<input name="ajuste" inputmode="decimal" value="0" /><small>Opcional: desconto negativo ou adicional positivo.</small></label>
-          <div class="fixed-map-note wide-field"><strong>Mapa fixo da casa</strong><span>120 assentos numerados em plateia, frisas e camarotes. O mapa é o mesmo para todos os eventos.</span></div>
-          <label>Carteira organizadora<input name="organizador" required autocomplete="off" /></label>
-          <label class="wide-field">Hash do programa (bytes32)<input name="referenciaPrograma" value="0x0000000000000000000000000000000000000000000000000000000000000000" pattern="0x[a-fA-F0-9]{64}" required /><small>Use o valor zerado acima se não houver hash.</small></label>
-          <button class="button button-gold wide-field" type="submit">Cadastrar evento na Sepolia</button>
-        </form>
-      </section>
 
-      <section id="meus-ingressos" class="tickets-section">
-        <div><p class="eyebrow">SUA CONTA</p><h2>Meus ingressos</h2></div>
-        <div id="wallet-details" class="wallet-details">Carteira não conectada</div>
-        <div id="organizer-revenue" class="organizer-revenue hidden"></div>
-        <div id="my-tickets" class="ticket-list"></div>
+        <section
+          id="eventos"
+          class="tab-panel active"
+          data-tab-panel="eventos"
+          role="tabpanel"
+          aria-labelledby="tab-eventos"
+        >
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">EM CARTAZ</p>
+              <h2>Próximos eventos</h2>
+              <p class="section-intro">
+                Escolha uma apresentação e garanta seu lugar.
+              </p>
+            </div>
+            <img
+              class="heading-ornament"
+              src="assets/06_losangos_trio.png"
+              alt=""
+              aria-hidden="true"
+            />
+          </div>
+          <div id="events-list" class="events-grid" aria-live="polite"></div>
+        </section>
+
+        <section
+          id="meus-ingressos"
+          class="tab-panel"
+          data-tab-panel="ingressos"
+          role="tabpanel"
+          aria-labelledby="tab-ingressos"
+          hidden
+        >
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">SUA COLEÇÃO</p>
+              <h2>Meus ingressos</h2>
+              <p class="section-intro">
+                Acompanhe as entradas vinculadas à sua carteira.
+              </p>
+            </div>
+            <img
+              class="heading-ornament small"
+              src="assets/05_losango_ornamento.png"
+              alt=""
+              aria-hidden="true"
+            />
+          </div>
+          <div id="my-tickets" class="ticket-list"></div>
+        </section>
+
+        <section
+          id="minha-conta"
+          class="tab-panel"
+          data-tab-panel="conta"
+          role="tabpanel"
+          aria-labelledby="tab-conta"
+          hidden
+        >
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">DADOS DA CARTEIRA</p>
+              <h2>Minha conta</h2>
+              <p class="section-intro">
+                Informações da conexão utilizada nesta bilheteria.
+              </p>
+            </div>
+            <img
+              class="heading-ornament small"
+              src="assets/05_losango_ornamento.png"
+              alt=""
+              aria-hidden="true"
+            />
+          </div>
+          <div class="account-card">
+            <div class="account-icon">TA</div>
+            <div>
+              <span class="account-label">CARTEIRA CONECTADA</span>
+              <div id="wallet-details" class="wallet-details">
+                Carteira não conectada
+              </div>
+            </div>
+          </div>
+          <div id="organizer-revenue" class="organizer-revenue hidden"></div>
+          <div class="account-note">
+            <span class="status-dot"></span> As transações desta aplicação são
+            realizadas na rede de testes Ethereum Sepolia.
+          </div>
+        </section>
+
+        <section
+          id="admin-panel"
+          class="tab-panel admin-panel hidden"
+          data-tab-panel="admin"
+          role="tabpanel"
+          aria-labelledby="tab-admin"
+          hidden
+        >
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">ÁREA RESTRITA</p>
+              <h2>Gerenciar programação</h2>
+              <p class="section-intro">
+                Cadastre eventos e acompanhe a operação da bilheteria.
+              </p>
+            </div>
+            <span class="admin-badge">Carteira administradora</span>
+          </div>
+          <form id="create-event-form" class="admin-form">
+            <label
+              >Nome do evento<input name="nome" required maxlength="100"
+            /></label>
+            <label>Data e horário<input name="dataHora" required /></label>
+            <label
+              >Local<input name="local" required value="Teatro Amazonas"
+            /></label>
+            <label
+              >Preço base (ETH)<input name="preco" required inputmode="decimal"
+            /></label>
+            <label
+              >Ajuste no preço (ETH)<input
+                name="ajuste"
+                inputmode="decimal"
+                value="0"
+              /><small
+                >Opcional: desconto negativo ou adicional positivo.</small
+              ></label
+            >
+            <div class="fixed-map-note wide-field">
+              <strong>Mapa fixo da casa</strong
+              ><span
+                >120 assentos numerados em plateia, frisas e camarotes. O mapa é
+                o mesmo para todos os eventos.</span
+              >
+            </div>
+            <label
+              >Carteira organizadora<input
+                name="organizador"
+                required
+                autocomplete="off"
+            /></label>
+            <label class="wide-field"
+              >Hash do programa (bytes32)<input
+                name="referenciaPrograma"
+                value="0x0000000000000000000000000000000000000000000000000000000000000000"
+                pattern="0x[a-fA-F0-9]{64}"
+                required
+              /><small
+                >Use o valor zerado acima se não houver hash.</small
+              ></label
+            >
+            <button class="button button-gold wide-field" type="submit">
+              Cadastrar evento na Sepolia
+            </button>
+          </form>
+        </section>
+        <img
+          class="section-divider"
+          src="assets/09_divisor_losango.png"
+          alt=""
+          aria-hidden="true"
+        />
       </section>
     </main>
 
-    <footer><span>Protótipo acadêmico para Ethereum Sepolia.</span><span>Sem vínculo oficial com o Teatro Amazonas.</span></footer>
+    <footer>
+      <span>Bilheteria Teatro Amazonas</span
+      ><span>Arthur Medeiros, Lucas Trovão e Samira Souza.</span>
+    </footer>
   </body>
 </html>

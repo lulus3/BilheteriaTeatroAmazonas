@@ -13,6 +13,103 @@
   const createEventForm = document.getElementById('create-event-form');
   const organizerRevenue = document.getElementById('organizer-revenue');
 
+  const adminTab = document.getElementById('tab-admin');
+  const tabButtons = [...document.querySelectorAll('[data-tab]')];
+  const tabPanels = [...document.querySelectorAll('[data-tab-panel]')];
+  const landingHero = document.getElementById('landing-hero');
+  const homeHeading = document.getElementById('workspace-home-heading');
+  const shortcutNav = document.getElementById('shortcut-nav');
+  const breadcrumbs = document.getElementById('breadcrumbs');
+  const breadcrumbCurrent = document.getElementById('breadcrumb-current');
+  const breadcrumbHome = document.getElementById('breadcrumb-home');
+  const pageTitles = {
+    eventos: 'Próximos eventos',
+    ingressos: 'Meus ingressos',
+    conta: 'Minha conta',
+    admin: 'Administração'
+  };
+  const siteTitle = 'Bilheteria Teatro Amazonas';
+
+  function updatePageTitle(page) {
+    document.title = pageTitles[page]
+      ? `${pageTitles[page]} | ${siteTitle}`
+      : siteTitle;
+  }
+
+  function showHome() {
+    document.getElementById("landing-hero").hidden = false;
+    document.getElementById("workspace-home-heading").hidden = false;
+    document.getElementById("shortcut-nav").hidden = false;
+
+    document.getElementById("breadcrumbs").hidden = true;
+
+    document.querySelectorAll("[data-tab-panel]").forEach((panel) => {
+      panel.hidden = true;
+      panel.classList.remove("active");
+    });
+
+    history.pushState(null, "", "#inicio");
+    document.title = "Bilheteria Teatro Amazonas";
+
+    setTimeout(() => {
+      document.getElementById("shortcut-nav").scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 100);
+  }
+
+  function activateTab(name, updateHistory = true) {
+    const button = tabButtons.find((item) => item.dataset.tab === name);
+    const panel = tabPanels.find((item) => item.dataset.tabPanel === name);
+    if (!button || !panel || button.classList.contains('hidden')) return;
+
+    landingHero.hidden = true;
+    homeHeading.hidden = true;
+    shortcutNav.hidden = true;
+    breadcrumbs.hidden = false;
+    breadcrumbCurrent.textContent = pageTitles[name] || name;
+
+    tabButtons.forEach((item) => {
+      const active = item === button;
+      item.classList.toggle('active', active);
+      if (active) item.setAttribute('aria-current', 'page');
+      else item.removeAttribute('aria-current');
+    });
+    tabPanels.forEach((item) => {
+      const active = item === panel;
+      item.classList.toggle('active', active);
+      item.hidden = !active;
+    });
+
+    updatePageTitle(name);
+    if (updateHistory && location.hash !== `#${name}`) {
+      history.pushState({ page: name }, '', `#${name}`);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function syncPageFromUrl() {
+    const page = location.hash.replace(/^#/, '');
+    if (pageTitles[page]) activateTab(page, false);
+    else showHome(false);
+  }
+
+  tabButtons.forEach((button) => {
+    button.addEventListener('click', () => activateTab(button.dataset.tab));
+  });
+  document.querySelectorAll('[data-open-tab]').forEach((button) => {
+    button.addEventListener('click', () => activateTab(button.dataset.openTab));
+  });
+  breadcrumbHome.addEventListener('click', () => showHome());
+  document.getElementById('brand-home').addEventListener('click', (event) => {
+    event.preventDefault();
+    showHome();
+  });
+  window.addEventListener('popstate', syncPageFromUrl);
+  window.addEventListener('hashchange', syncPageFromUrl);
+  syncPageFromUrl();
+
   let web3;
   let account;
   let contract;
@@ -130,12 +227,16 @@
     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
     account = accounts[0];
     adminPanel.classList.add('hidden');
+    adminPanel.hidden = true;
+    adminTab.classList.add('hidden');
     if (!account) {
       contract = undefined;
       administrator = undefined;
       connectButton.textContent = 'Conectar carteira';
       walletDetails.textContent = 'Carteira não conectada';
       adminPanel.classList.add('hidden');
+      adminPanel.hidden = true;
+      adminTab.classList.add('hidden');
       showNotice('Conecte sua carteira para carregar os eventos da Sepolia.');
       return;
     }
@@ -150,6 +251,8 @@
     if (!onSepolia) {
       contract = undefined;
       adminPanel.classList.add('hidden');
+      adminPanel.hidden = true;
+      adminTab.classList.add('hidden');
       eventsList.replaceChildren();
       showNotice('Troque a MetaMask para a rede Sepolia para usar esta bilheteria.', 'error');
       return;
@@ -188,6 +291,9 @@
     if (!contract || !account) return;
     const isAdmin = administrator?.toLowerCase() === account.toLowerCase();
     adminPanel.classList.toggle('hidden', !isAdmin);
+    adminPanel.hidden = !isAdmin;
+    adminTab.classList.toggle('hidden', !isAdmin);
+    if (!isAdmin && document.querySelector('.tab-button.active')?.dataset.tab === 'admin') showHome();
     const organizerInput = createEventForm.elements.organizador;
     if (!organizerInput.value) organizerInput.value = account;
 
@@ -537,6 +643,8 @@
         connectButton.textContent = 'Conectar carteira';
         walletDetails.textContent = 'Carteira não conectada';
         adminPanel.classList.add('hidden');
+        adminPanel.hidden = true;
+        adminTab.classList.add('hidden');
         eventsList.replaceChildren();
         myTickets.replaceChildren();
         showNotice('Conecte sua carteira para carregar os eventos da Sepolia.');
