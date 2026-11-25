@@ -95,15 +95,20 @@ O contrato armazena dados básicos dos eventos, preços, estado, IDs e disponibi
 - O mapa é esquemático e usa uma capacidade fixa de 120 assentos.
 - Os eventos são demonstrativos; o protótipo não vende ingressos reais, valida entrada física ou integra com o sistema do Teatro Amazonas.
 - Alterações no contrato exigem compilar e implantar uma nova versão para refletirem no endereço implantado.
-- A rede alvo indicada no guia PDF é Sepolia; o arquivo de instruções do trabalho também menciona blockchain local. Confirmar com o docente qual ambiente deve ser usado na demonstração.
+- A rede alvo indicada é Sepolia; o arquivo de instruções do trabalho também menciona blockchain local. Confirmar com o docente qual ambiente deve ser usado na demonstração.
 
 ## Informações para a entrega
 
-Preencher e conferir antes da entrega:
+### Integrantes e responsabilidades
 
-- Integrantes e papel de cada um.
+- Lucas Trovão — desenvolvimento do contrato inteligente.
+- Samira Farias — frontend e integração com o contrato.
+- Arthur Meira — frontend e integração com o contrato.
+
+### Deploy e materiais da entrega
+
+- URL pública da dApp na Vercel: [bilheteriateatroamazonas-frontend.vercel.app](https://bilheteriateatroamazonas-frontend.vercel.app/).
 - Endereço do contrato, transação de deploy, bloco e link do Etherscan; confirmar se o código está verificado.
-- URL pública da dApp na Vercel.
 - Resultados do roteiro de testes e links das evidências.
 - Links do vídeo de demonstração (3 a 5 minutos) e dos slides em PDF.
 - Declaração completa de uso de ferramentas de IA, se aplicável.
