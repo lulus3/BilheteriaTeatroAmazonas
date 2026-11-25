@@ -1140,3 +1140,186 @@ footer {
     font-size: 15px;
   }
 }
+
+body.modal-open {
+  overflow: hidden;
+}
+
+.seat-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(10, 7, 5, 0.82);
+  backdrop-filter: blur(7px);
+  animation: modal-fade-in 0.2s ease;
+}
+
+.seat-modal-overlay.hidden {
+  display: none;
+}
+
+.seat-modal {
+  width: min(1100px, 100%);
+  max-height: min(90vh, 850px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid rgba(201, 168, 117, 0.4);
+  border-radius: 5px;
+  box-shadow: 0 25px 90px rgba(0, 0, 0, 0.55);
+  animation: modal-slide-in 0.25s ease;
+}
+
+.seat-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px 30px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-deep);
+}
+
+.seat-modal-title .eyebrow {
+  margin-bottom: 7px;
+}
+
+.seat-modal-title h2 {
+  margin: 0;
+  font:
+    500 27px "Playfair Display",
+    serif;
+  color: var(--cream);
+}
+
+.seat-modal-title p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.seat-modal-close {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--cream);
+  font-size: 25px;
+  line-height: 1;
+  transition: 0.2s;
+}
+
+.seat-modal-close:hover {
+  background: rgba(201, 168, 117, 0.12);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.seat-modal-body {
+  padding: 26px 20px;
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.seat-modal-body .seat-map-container {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.seat-modal-body .venue-map-shell {
+  margin: 0 auto;
+}
+
+.seat-loading {
+  padding: 60px 15px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.seat-modal-footer {
+  padding: 18px 30px 24px;
+  border-top: 1px solid var(--line);
+  background: var(--bg-deep);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.seat-modal-footer .selection-summary {
+  flex: 1;
+  text-align: left;
+  margin: 0;
+}
+
+.seat-modal-footer .buy-button {
+  min-width: 190px;
+}
+
+@keyframes modal-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsividade */
+
+@media (max-width: 760px) {
+  .seat-modal-overlay {
+    padding: 10px;
+  }
+
+  .seat-modal {
+    max-height: 94vh;
+  }
+
+  .seat-modal-header {
+    padding: 18px;
+  }
+
+  .seat-modal-title h2 {
+    font-size: 22px;
+  }
+
+  .seat-modal-body {
+    padding: 18px 10px;
+  }
+
+  .seat-modal-footer {
+    padding: 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .seat-modal-footer .selection-summary {
+    text-align: center;
+  }
+
+  .seat-modal-footer .buy-button {
+    width: 100%;
+  }
+}
