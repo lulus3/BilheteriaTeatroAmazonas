@@ -457,183 +457,187 @@
       return card;
     }
 
-    
-const seatsToggle = node(
-  'button',
-  'button button-outline seat-toggle',
-  'Escolher assentos'
-);
-seatsToggle.type = 'button';
-card.append(seatsToggle);
+    const seatsToggle = node(
+      "button",
+      "button button-outline seat-toggle",
+      "Escolher assentos",
+    );
+    seatsToggle.type = "button";
+    card.append(seatsToggle);
 
-// Modal de seleção
-const picker = node('div', 'seat-modal-overlay hidden');
-picker.setAttribute('role', 'presentation');
+    // Modal de seleção
+    const picker = node("div", "seat-modal-overlay hidden");
+    picker.setAttribute("role", "presentation");
 
-const modal = node('div', 'seat-modal');
-modal.setAttribute('role', 'dialog');
-modal.setAttribute('aria-modal', 'true');
-modal.setAttribute('aria-label', `Escolha de assentos: ${event.name}`);
+    const modal = node("div", "seat-modal");
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-label", `Escolha de assentos: ${event.name}`);
 
-const modalHeader = node('div', 'seat-modal-header');
+    const modalHeader = node("div", "seat-modal-header");
 
-const modalTitle = node('div', 'seat-modal-title');
-modalTitle.append(node('span', 'eyebrow', 'SELEÇÃO DE LUGARES'));
-modalTitle.append(node('h2', '', 'Escolha seus assentos'));
-modalTitle.append(node('p', '', event.name));
+    const modalTitle = node("div", "seat-modal-title");
+    modalTitle.append(node("span", "eyebrow", "SELEÇÃO DE LUGARES"));
+    modalTitle.append(node("h2", "", "Escolha seus assentos"));
+    modalTitle.append(node("p", "", event.name));
 
-const closeButton = node('button', 'seat-modal-close', '×');
-closeButton.type = 'button';
-closeButton.setAttribute('aria-label', 'Fechar seleção de assentos');
+    const closeButton = node("button", "seat-modal-close", "×");
+    closeButton.type = "button";
+    closeButton.setAttribute("aria-label", "Fechar seleção de assentos");
 
-modalHeader.append(modalTitle, closeButton);
+    modalHeader.append(modalTitle, closeButton);
 
-// Área do mapa
-const modalBody = node('div', 'seat-modal-body');
-const seatMap = node('div', 'seat-map-container');
-modalBody.append(seatMap);
+    // Área do mapa
+    const modalBody = node("div", "seat-modal-body");
+    const seatMap = node("div", "seat-map-container");
+    modalBody.append(seatMap);
 
-// Rodapé do modal
-const modalFooter = node('div', 'seat-modal-footer');
+    // Rodapé do modal
+    const modalFooter = node("div", "seat-modal-footer");
 
-const selection = node(
-  'p',
-  'selection-summary',
-  'Selecione um ou mais assentos.'
-);
+    const selection = node(
+      "p",
+      "selection-summary",
+      "Selecione um ou mais assentos.",
+    );
 
-const buyButton = node(
-  'button',
-  'button button-gold buy-button',
-  'Comprar ingressos'
-);
-buyButton.type = 'button';
-buyButton.disabled = true;
+    const buyButton = node(
+      "button",
+      "button button-gold buy-button",
+      "Comprar ingressos",
+    );
+    buyButton.type = "button";
+    buyButton.disabled = true;
 
-modalFooter.append(selection, buyButton);
+    modalFooter.append(selection, buyButton);
 
-modal.append(modalHeader, modalBody, modalFooter);
-picker.append(modal);
-card.append(picker);
+    modal.append(modalHeader, modalBody, modalFooter);
+    picker.append(modal);
+    card.append(picker);
 
-const selectedSeats = new Map();
+    const selectedSeats = new Map();
 
-const closeModal = () => {
-  picker.classList.add('hidden');
-  document.body.classList.remove('modal-open');
-  seatsToggle.focus();
-};
+    const closeModal = () => {
+      picker.classList.add("hidden");
+      document.body.classList.remove("modal-open");
+      seatsToggle.focus();
+    };
 
-closeButton.addEventListener('click', closeModal);
+    closeButton.addEventListener("click", closeModal);
 
-picker.addEventListener('click', (eventClick) => {
-  if (eventClick.target === picker) {
-    closeModal();
-  }
-});
-
-const updateSelection = () => {
-  const chosen = [...selectedSeats.values()];
-  const total = BigInt(event.priceWei) * BigInt(chosen.length);
-
-  selection.textContent = chosen.length
-    ? `${chosen.length} assento(s): ${chosen.map((seat) => seat.code).join(', ')} · Total: ${formatEth(total.toString())} SepoliaETH.`
-    : 'Selecione um ou mais assentos.';
-
-  buyButton.textContent = chosen.length
-    ? `Comprar ${chosen.length} ingresso(s)`
-    : 'Comprar ingressos';
-
-  buyButton.disabled = chosen.length === 0;
-};
-
-// Abrir modal e carregar mapa
-seatsToggle.addEventListener('click', async () => {
-  picker.classList.remove('hidden');
-  document.body.classList.add('modal-open');
-
-  if (seatMap.dataset.loaded === 'true') return;
-
-  seatsToggle.disabled = true;
-  seatsToggle.textContent = 'Carregando lugares…';
-
-  seatMap.replaceChildren(
-    node('p', 'seat-loading', 'Consultando disponibilidade dos assentos...')
-  );
-
-  try {
-    await renderSeatMap(seatMap, event, (seat, button) => {
-      if (selectedSeats.has(seat.id)) {
-        selectedSeats.delete(seat.id);
-        button.classList.remove('selected');
-      } else {
-        selectedSeats.set(seat.id, seat);
-        button.classList.add('selected');
+    picker.addEventListener("click", (eventClick) => {
+      if (eventClick.target === picker) {
+        closeModal();
       }
-
-      updateSelection();
     });
 
-    seatMap.dataset.loaded = 'true';
-  } catch (error) {
-    seatMap.replaceChildren();
-    showNotice(
-      `Não consegui consultar os assentos: ${friendlyError(error)}`,
-      'error'
-    );
-    closeModal();
-  } finally {
-    seatsToggle.disabled = false;
-    seatsToggle.textContent = 'Escolher assentos';
+    const updateSelection = () => {
+      const chosen = [...selectedSeats.values()];
+      const total = BigInt(event.priceWei) * BigInt(chosen.length);
+
+      selection.textContent = chosen.length
+        ? `${chosen.length} assento(s): ${chosen.map((seat) => seat.code).join(", ")} · Total: ${formatEth(total.toString())} SepoliaETH.`
+        : "Selecione um ou mais assentos.";
+
+      buyButton.textContent = chosen.length
+        ? `Comprar ${chosen.length} ingresso(s)`
+        : "Comprar ingressos";
+
+      buyButton.disabled = chosen.length === 0;
+    };
+
+    // Abrir modal e carregar mapa
+    seatsToggle.addEventListener("click", async () => {
+      picker.classList.remove("hidden");
+      document.body.classList.add("modal-open");
+
+      if (seatMap.dataset.loaded === "true") return;
+
+      seatsToggle.disabled = true;
+      seatsToggle.textContent = "Carregando lugares…";
+
+      seatMap.replaceChildren(
+        node(
+          "p",
+          "seat-loading",
+          "Consultando disponibilidade dos assentos...",
+        ),
+      );
+
+      try {
+        await renderSeatMap(seatMap, event, (seat, button) => {
+          if (selectedSeats.has(seat.id)) {
+            selectedSeats.delete(seat.id);
+            button.classList.remove("selected");
+          } else {
+            selectedSeats.set(seat.id, seat);
+            button.classList.add("selected");
+          }
+
+          updateSelection();
+        });
+
+        seatMap.dataset.loaded = "true";
+      } catch (error) {
+        seatMap.replaceChildren();
+        showNotice(
+          `Não consegui consultar os assentos: ${friendlyError(error)}`,
+          "error",
+        );
+        closeModal();
+      } finally {
+        seatsToggle.disabled = false;
+        seatsToggle.textContent = "Escolher assentos";
+      }
+    });
+
+    // Compra dos ingressos
+    buyButton.addEventListener("click", async () => {
+      const seatsToBuy = [...selectedSeats.values()];
+
+      if (!seatsToBuy.length) return;
+
+      buyButton.disabled = true;
+
+      try {
+        const seatIds = seatsToBuy.map((seat) => seat.id);
+        const totalWei = (
+          BigInt(event.priceWei) * BigInt(seatIds.length)
+        ).toString();
+
+        buyButton.textContent = `Confirmando ${seatIds.length} ingresso(s)…`;
+
+        const transaction = contract.methods
+          .comprarIngressos(event.id, seatIds)
+          .send({ from: account, value: totalWei });
+
+        await sendTransaction(
+          transaction,
+          `Compra de ${seatIds.length} ingresso(s) enviada`,
+          { refresh: false },
+        );
+
+        closeModal();
+        selectedSeats.clear();
+
+        await refreshApplication();
+
+        showNotice(
+          `${seatIds.length} ingresso(s) comprado(s) com sucesso em uma única transação.`,
+          "success",
+        );
+      } catch (error) {
+        closeModal();
+        await refreshApplication();
+
+        showNotice(
+          `Não foi possível concluir a compra dos ingressos: ${friendlyError(error)}`,
+          "error",
+        );
+      }
+    });
+    return card;
   }
-});
-
-// Compra dos ingressos
-buyButton.addEventListener('click', async () => {
-  const seatsToBuy = [...selectedSeats.values()];
-
-  if (!seatsToBuy.length) return;
-
-  buyButton.disabled = true;
-
-  try {
-    const seatIds = seatsToBuy.map((seat) => seat.id);
-    const totalWei = (
-      BigInt(event.priceWei) * BigInt(seatIds.length)
-    ).toString();
-
-    buyButton.textContent = `Confirmando ${seatIds.length} ingresso(s)…`;
-
-    const transaction = contract.methods
-      .comprarIngressos(event.id, seatIds)
-      .send({ from: account, value: totalWei });
-
-    await sendTransaction(
-      transaction,
-      `Compra de ${seatIds.length} ingresso(s) enviada`,
-      { refresh: false }
-    );
-
-    closeModal();
-    selectedSeats.clear();
-
-    await refreshApplication();
-
-    showNotice(
-      `${seatIds.length} ingresso(s) comprado(s) com sucesso em uma única transação.`,
-      'success'
-    );
-  } catch (error) {
-    closeModal();
-    await refreshApplication();
-
-    showNotice(
-      `Não foi possível concluir a compra dos ingressos: ${friendlyError(error)}`,
-      'error'
-    );
-  }
-});
-
 
   async function renderSeatMap(container, event, onSelect) {
     container.replaceChildren();
