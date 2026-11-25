@@ -258,7 +258,13 @@
             <label
               >Nome do evento<input name="nome" required maxlength="100"
             /></label>
-            <label>Data e horário<input name="dataHora" required /></label>
+            <label
+              >Data e horário<input
+                name="dataHora"
+                type="datetime-local"
+                step="60"
+                required
+            /></label>
             <label
               >Local<input name="local" required value="Teatro Amazonas"
             /></label>
@@ -277,8 +283,7 @@
             <div class="fixed-map-note wide-field">
               <strong>Mapa fixo da casa</strong
               ><span
-                >120 assentos numerados em plateia, frisas e camarotes. O mapa é
-                o mesmo para todos os eventos.</span
+                >120 assentos numerados em plateia, frisas e camarotes.</span
               >
             </div>
             <label
@@ -287,16 +292,6 @@
                 required
                 autocomplete="off"
             /></label>
-            <label class="wide-field"
-              >Hash do programa (bytes32)<input
-                name="referenciaPrograma"
-                value="0x0000000000000000000000000000000000000000000000000000000000000000"
-                pattern="0x[a-fA-F0-9]{64}"
-                required
-              /><small
-                >Use o valor zerado acima se não houver hash.</small
-              ></label
-            >
             <button class="button button-gold wide-field" type="submit">
               Cadastrar evento na Sepolia
             </button>

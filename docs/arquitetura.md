@@ -24,7 +24,7 @@ flowchart LR
 ### Administração
 
 1. O administrador conecta a carteira que implantou o contrato.
-2. Cadastra um evento com nome, data, local, preço-base, ajuste opcional (desconto ou adicional), referência hash opcional para detalhes extensos e organizador. O mapa fixo tem 120 lugares.
+2. Cadastra um evento com nome, data, local, preço-base, ajuste opcional (desconto ou adicional) e organizador. O campo reservado `referenciaPrograma` é enviado como zero pela interface. O mapa fixo tem 120 lugares.
 3. Pode alterar o estado do evento para cancelado ou encerrado.
 
 ### Compra de ingresso
@@ -43,7 +43,7 @@ flowchart LR
 
 ## Modelo inicial
 
-- `Evento`: nome, data, local, preço-base e ajuste assinado em wei, hash opcional do programa, organizador, capacidade fixa de 120, quantidade vendida e estado.
+- `Evento`: nome, data, local, preço-base e ajuste assinado em wei, campo reservado `referenciaPrograma` (zerado pela interface), organizador, capacidade fixa de 120, quantidade vendida e estado.
 - `Ingresso`: evento, ID fixo do assento, comprador e valor pago.
 - `StatusEvento`: agendado, cancelado ou encerrado.
 - Inventário on-chain: IDs numéricos de 1 a 120; compras com qualquer outro ID são recusadas.

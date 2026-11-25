@@ -7,6 +7,7 @@
   const networkStatus = document.getElementById('network-status');
   const walletDetails = document.getElementById('wallet-details');
   const notice = document.getElementById('notice');
+  let noticeTimeout;
   const eventsList = document.getElementById('events-list');
   const myTickets = document.getElementById('my-tickets');
   const adminPanel = document.getElementById('admin-panel');
@@ -130,6 +131,9 @@
   }
 
   function showNotice(message, kind = 'info', txHash) {
+    clearTimeout(noticeTimeout);
+    noticeTimeout = undefined;
+    notice.hidden = false;
     notice.replaceChildren(document.createTextNode(message));
     notice.dataset.kind = kind;
     if (txHash) {
@@ -146,6 +150,16 @@
       switchButton.type = 'button';
       switchButton.addEventListener('click', switchToSepolia);
       notice.append(switchButton);
+    }
+
+    const dismissAfter = kind === 'success' ? 7000 : kind === 'error' ? 10000 : 0;
+    if (dismissAfter) {
+      noticeTimeout = setTimeout(() => {
+        notice.replaceChildren();
+        notice.hidden = true;
+        delete notice.dataset.kind;
+        noticeTimeout = undefined;
+      }, dismissAfter);
     }
   }
 
@@ -182,6 +196,14 @@
       status: statusNumber,
       statusLabel: EVENT_STATUS[statusNumber] || 'Indefinido'
     };
+  }
+
+  function formatEventDateTime(value) {
+    const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(value);
+    if (!match) return value;
+
+    const [, year, month, day, hour, minute] = match;
+    return `${day}/${month}/${year} às ${hour}:${minute}`;
   }
 
   async function verifyNetwork() {
@@ -335,7 +357,7 @@
     card.append(top);
     card.append(node('h3', '', event.name));
     const meta = node('div', 'event-meta');
-    meta.append(node('p', '', `◷  ${event.dateTime}`));
+    meta.append(node('p', '', `◷  ${formatEventDateTime(event.dateTime)}`));
     meta.append(node('p', '', `⌖  ${event.venue}`));
     meta.append(node('p', '', `${event.totalSeats} assentos fixos · ${event.sold} vendidos`));
     card.append(meta);
@@ -374,7 +396,7 @@
       const chosen = [...selectedSeats.values()];
       const total = BigInt(event.priceWei) * BigInt(chosen.length);
       selection.textContent = chosen.length
-        ? `${chosen.length} assento(s): ${chosen.map((seat) => seat.code).join(', ')} · total ${formatEth(total.toString())} SepoliaETH. A MetaMask pedirá uma confirmação para cada ingresso.`
+        ? `${chosen.length} assento(s): ${chosen.map((seat) => seat.code).join(', ')} · total ${formatEth(total.toString())} SepoliaETH.`
         : 'Selecione um ou mais assentos.';
       buyButton.textContent = chosen.length ? `Comprar ${chosen.length} ingresso(s)` : 'Comprar ingressos';
       buyButton.disabled = chosen.length === 0;
@@ -411,24 +433,18 @@
       const seatsToBuy = [...selectedSeats.values()];
       if (!seatsToBuy.length) return;
       buyButton.disabled = true;
-      let bought = 0;
       try {
-        for (const seat of seatsToBuy) {
-          buyButton.textContent = `Confirmando ${bought + 1} de ${seatsToBuy.length}…`;
-          const transaction = contract.methods.comprarIngresso(event.id, seat.id)
-            .send({ from: account, value: event.priceWei });
-          await sendTransaction(transaction, `Compra do assento ${seat.code} enviada`, { refresh: false });
-          bought += 1;
-        }
+        const seatIds = seatsToBuy.map((seat) => seat.id);
+        const totalWei = (BigInt(event.priceWei) * BigInt(seatIds.length)).toString();
+        buyButton.textContent = `Confirmando ${seatIds.length} ingresso(s)…`;
+        const transaction = contract.methods.comprarIngressos(event.id, seatIds)
+          .send({ from: account, value: totalWei });
+        await sendTransaction(transaction, `Compra de ${seatIds.length} ingresso(s) enviada`, { refresh: false });
         await refreshApplication();
-        showNotice(`${bought} ingresso(s) comprado(s) com sucesso.`, 'success');
+        showNotice(`${seatIds.length} ingresso(s) comprado(s) com sucesso em uma única transação.`, 'success');
       } catch (error) {
         await refreshApplication();
-        if (bought) {
-          showNotice(`${bought} de ${seatsToBuy.length} ingresso(s) foram comprados. A próxima confirmação falhou: ${friendlyError(error)}`, 'error');
-        } else {
-          showNotice(friendlyError(error), 'error');
-        }
+        showNotice(`Não foi possível concluir a compra dos ingressos: ${friendlyError(error)}`, 'error');
       } finally {
         selectedSeats.clear();
         updateSelection();
@@ -591,8 +607,6 @@
     try {
       const organizer = String(form.get('organizador')).trim();
       if (!web3.utils.isAddress(organizer)) throw new Error('Informe um endereço válido para o organizador.');
-      const reference = String(form.get('referenciaPrograma')).trim();
-      if (!/^0x[a-fA-F0-9]{64}$/.test(reference)) throw new Error('O hash do programa precisa ter 32 bytes em hexadecimal.');
       const basePrice = ethToWei(form.get('preco'));
       if (BigInt(basePrice) <= 0n) throw new Error('O preço base precisa ser maior que zero.');
       const adjustment = ethToWei(form.get('ajuste') || '0', true);
@@ -602,7 +616,7 @@
         String(form.get('local')).trim(),
         basePrice,
         adjustment,
-        reference,
+        ZERO_BYTES32,
         organizer
       ];
       const transaction = contract.methods.criarEvento(eventData).send({ from: account });
@@ -611,7 +625,6 @@
       createEventForm.elements.local.value = 'Teatro Amazonas';
       createEventForm.elements.ajuste.value = '0';
       createEventForm.elements.organizador.value = account;
-      createEventForm.elements.referenciaPrograma.value = ZERO_BYTES32;
     } catch (error) {
       showNotice(friendlyError(error), 'error');
     } finally {

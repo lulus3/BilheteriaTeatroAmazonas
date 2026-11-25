@@ -2,7 +2,7 @@
 // Faça um novo deploy, pois o ABI e a assinatura das funções mudaram.
 // Depois copie o endereço e o ABI desse novo deploy no Remix.
 window.BILHETERIA_CONTRACT = {
-  address: "0xA9789413Ba0547AF4aF4BBA1EF9589FaE9e6C8ec",
+  address: "0x1a8f7519B10bC0C7dB111d2D965B2b09627b3e6f",
   abi: [
     {
       "inputs": [],
@@ -51,6 +51,17 @@ window.BILHETERIA_CONTRACT = {
           "type": "uint16"
         }
       ],
+      "name": "AssentoDuplicado",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint16",
+          "name": "assentoId",
+          "type": "uint16"
+        }
+      ],
       "name": "AssentoInvalido",
       "type": "error"
     },
@@ -89,6 +100,30 @@ window.BILHETERIA_CONTRACT = {
           "internalType": "uint256",
           "name": "ingressoId",
           "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "eventoId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint16[]",
+          "name": "assentoIds",
+          "type": "uint16[]"
+        }
+      ],
+      "name": "comprarIngressos",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "ingressoIds",
+          "type": "uint256[]"
         }
       ],
       "stateMutability": "payable",
@@ -195,8 +230,20 @@ window.BILHETERIA_CONTRACT = {
     },
     {
       "inputs": [],
+      "name": "ListaAssentosVazia",
+      "type": "error"
+    },
+    {
+      "inputs": [],
       "name": "Reentrancia",
       "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "sacarReceita",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
       "inputs": [],
@@ -299,13 +346,6 @@ window.BILHETERIA_CONTRACT = {
       ],
       "name": "ReceitaSacada",
       "type": "event"
-    },
-    {
-      "inputs": [],
-      "name": "sacarReceita",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
     },
     {
       "anonymous": false,
