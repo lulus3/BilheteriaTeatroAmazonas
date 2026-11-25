@@ -160,26 +160,6 @@ contract BilheteriaTeatroAmazonas {
         }
     }
 
-    // Mantém compatibilidade com o frontend atual, que envia uma transação por assento.
-    function comprarIngresso(uint256 eventoId, uint16 assentoId)
-        external
-        payable
-        eventoExiste(eventoId)
-        returns (uint256 ingressoId)
-    {
-        Evento storage evento = _eventos[eventoId];
-        if (evento.status != StatusEvento.Agendado) revert EventoNaoAgendado(eventoId);
-        if (assentoId == 0 || assentoId > TOTAL_ASSENTOS) revert AssentoInvalido(assentoId);
-        if (_ingressoPorAssento[eventoId][assentoId] != 0) {
-            revert AssentoOcupado(eventoId, assentoId);
-        }
-
-        uint256 preco = _calcularPreco(evento);
-        if (msg.value != preco) revert ValorIncorreto(preco, msg.value);
-
-        return _registrarIngresso(eventoId, assentoId, msg.sender, preco);
-    }
-
     function _registrarIngresso(uint256 eventoId, uint16 assentoId, address comprador, uint256 valorPago)
         private
         returns (uint256 ingressoId)

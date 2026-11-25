@@ -2,7 +2,7 @@
 // Faça um novo deploy, pois o ABI e a assinatura das funções mudaram.
 // Depois copie o endereço e o ABI desse novo deploy no Remix.
 window.BILHETERIA_CONTRACT = {
-  address: "0x1a8f7519B10bC0C7dB111d2D965B2b09627b3e6f",
+  address: "0x726227c0066A35f3fe2b06c32Ca6Fb1650B802AD",
   abi: [
     {
       "inputs": [],
@@ -80,30 +80,6 @@ window.BILHETERIA_CONTRACT = {
       ],
       "name": "AssentoOcupado",
       "type": "error"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "eventoId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint16",
-          "name": "assentoId",
-          "type": "uint16"
-        }
-      ],
-      "name": "comprarIngresso",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "ingressoId",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "payable",
-      "type": "function"
     },
     {
       "inputs": [
@@ -240,13 +216,6 @@ window.BILHETERIA_CONTRACT = {
     },
     {
       "inputs": [],
-      "name": "sacarReceita",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
       "name": "SemReceitaPendente",
       "type": "error"
     },
@@ -346,6 +315,13 @@ window.BILHETERIA_CONTRACT = {
       ],
       "name": "ReceitaSacada",
       "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "sacarReceita",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
       "anonymous": false,
