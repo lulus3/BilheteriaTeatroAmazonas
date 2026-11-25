@@ -61,6 +61,8 @@ contract BilheteriaTeatroAmazonas {
     error DimensoesInvalidas();
     error AssentoInvalido(uint16 assentoId);
     error AssentoOcupado(uint256 eventoId, uint16 assentoId);
+    error AssentoDuplicado(uint16 assentoId);
+    error ListaAssentosVazia();
     error ValorIncorreto(uint256 esperado, uint256 recebido);
     error SemReceitaPendente();
     error FalhaNoSaque();
@@ -100,13 +102,9 @@ contract BilheteriaTeatroAmazonas {
         _saqueEmAndamento = false;
     }
 
-    function criarEvento(DadosNovoEvento calldata dados)
-        external
-        apenasAdministrador
-        returns (uint256 eventoId)
+    function criarEvento(DadosNovoEvento calldata dados) external apenasAdministrador returns (uint256 eventoId)
     {
-        if (
-            bytes(dados.nome).length == 0 || bytes(dados.dataHora).length == 0 || bytes(dados.local).length == 0
+        if (bytes(dados.nome).length == 0 || bytes(dados.dataHora).length == 0 || bytes(dados.local).length == 0
                 || dados.precoWei == 0 || dados.organizador == address(0)
         ) revert DimensoesInvalidas();
 
@@ -127,15 +125,42 @@ contract BilheteriaTeatroAmazonas {
         emit EventoCriado(eventoId, dados.nome, dados.organizador);
     }
 
-    function alterarStatusEvento(uint256 eventoId, StatusEvento novoStatus)
-        external
-        apenasAdministrador
-        eventoExiste(eventoId)
+    function alterarStatusEvento(uint256 eventoId, StatusEvento novoStatus) external apenasAdministrador eventoExiste(eventoId)
     {
         _eventos[eventoId].status = novoStatus;
         emit StatusDoEventoAlterado(eventoId, novoStatus);
     }
 
+    function comprarIngressos(uint256 eventoId, uint16[] calldata assentoIds) external payable eventoExiste(eventoId) 
+    returns (uint256[] memory ingressoIds)
+    {
+        Evento storage evento = _eventos[eventoId];
+        if (evento.status != StatusEvento.Agendado) revert EventoNaoAgendado(eventoId);
+        if (assentoIds.length == 0) revert ListaAssentosVazia();
+
+        for (uint256 i; i < assentoIds.length; ++i) {
+            uint16 assentoId = assentoIds[i];
+            if (assentoId == 0 || assentoId > TOTAL_ASSENTOS) revert AssentoInvalido(assentoId);
+            if (_ingressoPorAssento[eventoId][assentoId] != 0) {
+                revert AssentoOcupado(eventoId, assentoId);
+            }
+            for (uint256 j; j < i; ++j) {
+                if (assentoIds[j] == assentoId) revert AssentoDuplicado(assentoId);
+            }
+        }
+
+        uint256 precoUnitario = _calcularPreco(evento);
+        if (precoUnitario > type(uint256).max / assentoIds.length) revert AjustePrecoInvalido();
+        uint256 valorTotal = precoUnitario * assentoIds.length;
+        if (msg.value != valorTotal) revert ValorIncorreto(valorTotal, msg.value);
+
+        ingressoIds = new uint256[](assentoIds.length);
+        for (uint256 i; i < assentoIds.length; ++i) {
+            ingressoIds[i] = _registrarIngresso(eventoId, assentoIds[i], msg.sender, precoUnitario);
+        }
+    }
+
+    // Mantém compatibilidade com o frontend atual, que envia uma transação por assento.
     function comprarIngresso(uint256 eventoId, uint16 assentoId)
         external
         payable
@@ -145,26 +170,34 @@ contract BilheteriaTeatroAmazonas {
         Evento storage evento = _eventos[eventoId];
         if (evento.status != StatusEvento.Agendado) revert EventoNaoAgendado(eventoId);
         if (assentoId == 0 || assentoId > TOTAL_ASSENTOS) revert AssentoInvalido(assentoId);
-
         if (_ingressoPorAssento[eventoId][assentoId] != 0) {
             revert AssentoOcupado(eventoId, assentoId);
         }
-        uint256 precoFinal = _calcularPreco(evento);
-        if (msg.value != precoFinal) revert ValorIncorreto(precoFinal, msg.value);
 
+        uint256 preco = _calcularPreco(evento);
+        if (msg.value != preco) revert ValorIncorreto(preco, msg.value);
+
+        return _registrarIngresso(eventoId, assentoId, msg.sender, preco);
+    }
+
+    function _registrarIngresso(uint256 eventoId, uint16 assentoId, address comprador, uint256 valorPago)
+        private
+        returns (uint256 ingressoId)
+    {
+        Evento storage evento = _eventos[eventoId];
         ingressoId = proximoIngressoId++;
         _ingressoPorAssento[eventoId][assentoId] = ingressoId;
         _ingressos[ingressoId] = Ingresso({
             eventoId: eventoId,
             assentoId: assentoId,
-            comprador: msg.sender,
-            valorPago: msg.value
+            comprador: comprador,
+            valorPago: valorPago
         });
-        _ingressosPorComprador[msg.sender].push(ingressoId);
+        _ingressosPorComprador[comprador].push(ingressoId);
         evento.ingressosVendidos++;
-        receitaPendente[evento.organizador] += msg.value;
+        receitaPendente[evento.organizador] += valorPago;
 
-        emit IngressoComprado(eventoId, ingressoId, msg.sender, assentoId, msg.value);
+        emit IngressoComprado(eventoId, ingressoId, comprador, assentoId, valorPago);
     }
 
     function sacarReceita() external semReentrancia {
@@ -178,10 +211,7 @@ contract BilheteriaTeatroAmazonas {
         emit ReceitaSacada(msg.sender, valor);
     }
 
-    function consultarEvento(uint256 eventoId) external
-        view
-        eventoExiste(eventoId)
-        returns (Evento memory)
+    function consultarEvento(uint256 eventoId) external view eventoExiste(eventoId) returns (Evento memory)
     {
         return _eventos[eventoId];
     }
@@ -203,10 +233,7 @@ contract BilheteriaTeatroAmazonas {
         return _ingressosPorComprador[msg.sender];
     }
 
-    function listarMeusIngressos(uint256 inicio, uint256 quantidade)
-        external
-        view
-        returns (uint256[] memory pagina)
+    function listarMeusIngressos(uint256 inicio, uint256 quantidade) external view returns (uint256[] memory pagina)
     {
         uint256[] storage ids = _ingressosPorComprador[msg.sender];
         if (inicio >= ids.length || quantidade == 0) return new uint256[](0);
@@ -223,12 +250,7 @@ contract BilheteriaTeatroAmazonas {
         }
     }
 
-    /// @notice Informa se uma cadeira fixa está livre.
-    function assentoDisponivel(uint256 eventoId, uint16 assentoId)
-        external
-        view
-        eventoExiste(eventoId)
-        returns (bool)
+    function assentoDisponivel(uint256 eventoId, uint16 assentoId) external view eventoExiste(eventoId) returns (bool)
     {
         if (assentoId == 0 || assentoId > TOTAL_ASSENTOS) revert AssentoInvalido(assentoId);
         return _ingressoPorAssento[eventoId][assentoId] == 0;
@@ -236,7 +258,6 @@ contract BilheteriaTeatroAmazonas {
 
     function _calcularPreco(Evento storage evento) private view returns (uint256) {
         if (evento.ajustePrecoWei < 0) {
-            // Esta forma também trata com segurança o menor int256 negativo.
             uint256 desconto = uint256(-(evento.ajustePrecoWei + 1)) + 1;
             if (desconto >= evento.precoWei) revert AjustePrecoInvalido();
             return evento.precoWei - desconto;
