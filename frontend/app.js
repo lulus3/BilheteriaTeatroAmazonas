@@ -490,7 +490,16 @@
     // Área do mapa
     const modalBody = node("div", "seat-modal-body");
     const seatMap = node("div", "seat-map-container");
-    modalBody.append(seatMap);
+
+    const loadingMessage = node("div", "seat-loading");
+    loadingMessage.innerHTML = `
+  <span class="seat-loading-spinner"></span>
+  <strong>Carregando lugares...</strong>
+  <span>Estamos consultando a disponibilidade dos assentos.</span>
+`;
+
+    modalBody.append(loadingMessage, seatMap);
+    seatMap.hidden = true;
 
     // Rodapé do modal
     const modalFooter = node("div", "seat-modal-footer");
@@ -556,13 +565,8 @@
       seatsToggle.disabled = true;
       seatsToggle.textContent = "Carregando lugares…";
 
-      seatMap.replaceChildren(
-        node(
-          "p",
-          "seat-loading",
-          "Consultando disponibilidade dos assentos...",
-        ),
-      );
+      loadingMessage.hidden = false;
+      seatMap.hidden = true;
 
       try {
         await renderSeatMap(seatMap, event, (seat, button) => {
@@ -578,12 +582,16 @@
         });
 
         seatMap.dataset.loaded = "true";
+        seatMap.hidden = false;
+        loadingMessage.hidden = true;
       } catch (error) {
-        seatMap.replaceChildren();
+        loadingMessage.hidden = true;
+
         showNotice(
           `Não consegui consultar os assentos: ${friendlyError(error)}`,
           "error",
         );
+
         closeModal();
       } finally {
         seatsToggle.disabled = false;
